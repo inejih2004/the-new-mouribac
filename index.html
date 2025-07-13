@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حاسبة المعدل الوطني - موريتانيا</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: 'Cairo', sans-serif;
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .subject-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .whatsapp-btn {
+      background-color: #25D366;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="card p-4">
+    <h2 class="text-center mb-4">حاسبة المعدل الوطني للمسابقات الموريتانية</h2>
+
+    <div class="mb-3">
+      <label for="examType" class="form-label">اختر نوع المسابقة / Choisissez le type d'examen</label>
+      <select id="examType" class="form-select" onchange="renderSubjects()">
+        <option disabled selected>-- اختر --</option>
+        <option value="bac_d">BAC D</option>
+        <option value="bac_c">BAC C</option>
+        <option value="bac_a">BAC A</option>
+        <option value="bac_o">BAC O</option>
+        <option value="bep_c">BEPC</option>
+      </select>
+    </div>
+
+    <form id="gradeForm"></form>
+
+    <button onclick="calculateAverage()" class="btn btn-primary w-100">احسب المعدل / Calculer la moyenne</button>
+
+    <div id="result" class="text-center mt-4 fs-4 fw-bold"></div>
+
+    <div class="text-center mt-4">
+      <p>إذا كنت ترغب في دعمنا، تواصل معنا:</p>
+      <a href="https://wa.me/22220000000?text=أرغب%20في%20دعمك%20بمبلغ%2050%20أوقية" target="_blank" class="btn whatsapp-btn">
+        💰 أريد التبرع بـ 50 أوقية
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const exams = {
+    bac_d: [
+      { name: "الرياضيات / Mathématiques", coef: 6 },
+      { name: " الفيزياء / Physique chimie ", coef: 7},
+      { name:"العربية / arab", coef: 3 },
+      { name: "العلوم / Sciences", coef: 8 },
+      { name: "الإنجليزية / anglais", coef: 2 },
+      { name: "الفرنسية/ francais", coef: 3 },
+      { name: "الرياضة البدنية / sport", coef: 2 },
+      
+    ],
+    bac_c: [
+      { name: "الرياضيات / Mathématiques", coef: 9 },
+      { name: "الفيزياء / Physique Chimie", coef: 8 },
+      { name: "science / العلوم", coef: 4 },
+      { name: "الفرنسية / Français", coef: 3 },
+      { name: "الإنجليزية / Anglais", coef: 2 },
+      { name: "التربية الإسلامية/ IR", coef: 2},
+
+      { name: "الرياضة البدنية/ sport", coef: 1},
+   
+    ],
+    bac_a: [
+      { name: "الفلسفة / Philosophie", coef: 6},
+      { name: " و الجغرافيا التاريخ / Histoire", coef: 5},
+      { name: "العربية/ arab", coef: 6 },
+      { name: "الإنجليزية / anglais", coef: 4 },
+      { name: "الرياضيات/ mathematic", coef: 2 },
+      { name: "التربية الإسلامية/ IR", coef:  2},
+      { name: "الرياضية البدنية/ sport", coef: 1},
+      
+    ],
+    bac_o: [
+      { name: "التشريع الاسلامية", coef: 7 },
+      { name: "العربية", coef: 7 },
+      { name: "الفكر الاسلامي", coef: 6 },
+      { name: "التاريخ والجغرافيا", coef: 4 },
+      { name: "الرياضيات / Mathématiques", coef: 2 },
+      { name: "القرآن والحديث", coef: 3 },
+      { name: "الفرنسية / Français", coef: 2 },
+         { name: "الرياضة البدنية/ sport", coef: 1},
+    ],
+    bep_c: [
+      { name: "الرياضيات / Mathématiques", coef: 5 },
+      { name: "الفيزياء / Physique Chimie", coef: 2 },
+      { name: "اللغة العربية / Arabe", coef: 3 },
+      { name: "اللغة الفرنسية / Français", coef: 2 },
+      { name: "اللغة الإنجليزية / Anglais", coef: 1 },
+      { name: "التربية الإسلامية / IR", coef: 2 },
+            { name: " و الجغرافيا التاريخ / Histoire", coef: 1},
+      { name: "العلوم / Sciences", coef: 2 },
+        { name: "الرياضة البدنية/ sport", coef: 1},
+            { name: "   لتربية", coef: 1},
+          
+    
+    ],
+  };
+
+  function renderSubjects() {
+    const type = document.getElementById("examType").value;
+    const subjects = exams[type];
+    const form = document.getElementById("gradeForm");
+    form.innerHTML = "";
+
+    subjects.forEach((subj, index) => {
+      form.innerHTML += `
+        <div class="subject-input">
+          <label class="form-label w-50">${subj.name} (معامل ${subj.coef})</label>
+          <input type="number" min="0" max="20" step="0.1" class="form-control" placeholder="أدخل النقطة" id="subject-${index}" required>
+        </div>`;
+    });
+  }
+
+  function calculateAverage() {
+    const type = document.getElementById("examType").value;
+    const subjects = exams[type];
+    let total = 0, coefSum = 0;
+    let valid = true;
+
+    subjects.forEach((subj, index) => {
+      const val = parseFloat(document.getElementById(`subject-${index}`).value);
+      if (isNaN(val) || val < 0 || val > 20) {
+        valid = false;
+        return;
+      }
+      total += val * subj.coef;
+      coefSum += subj.coef;
+    });
+
+    const result = document.getElementById("result");
+    if (!valid || coefSum === 0) {
+      result.innerHTML = "يرجى إدخال جميع النقاط بشكل صحيح / Veuillez remplir tous les champs correctement.";
+    } else {
+      const avg = (total / coefSum).toFixed(2);
+      result.innerHTML = `📊 معدلك هو: <span class="text-success">${avg}</span> من 20`;
+    }
+  }
+</script>
+</body>
+</html>
